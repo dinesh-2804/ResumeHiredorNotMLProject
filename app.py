@@ -2,11 +2,22 @@ import streamlit as st
 import pandas as pd
 import pickle
 
+# Ensure module dependencies for unpickling are imported
+import xgboost
+import imblearn
+
 # =========================
 # LOAD MODEL
 # =========================
-with open("best_xgboost_model.pkl", "rb") as f:
-    model = pickle.load(f)
+try:
+    with open("best_xgboost_model.pkl", "rb") as f:
+        model = pickle.load(f)
+except ModuleNotFoundError as e:
+    st.error("Model loading failed due to missing Python package: {}.\nAdd it to requirements.txt and redeploy.".format(e.name))
+    raise
+except Exception as e:
+    st.error("Unexpected error loading model: {}".format(e))
+    raise
 
 st.set_page_config(page_title="Hiring Prediction App", layout="centered")
 
