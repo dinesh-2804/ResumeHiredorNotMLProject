@@ -3,8 +3,25 @@ import pandas as pd
 import pickle
 
 # Ensure module dependencies for unpickling are imported
-import xgboost
-import imblearn
+missing_packages = []
+for pkg in ("xgboost", "imblearn"):
+    try:
+        __import__(pkg)
+    except ModuleNotFoundError:
+        missing_packages.append(pkg)
+
+if missing_packages:
+    st.error(
+        "Model loading failed because the following package(s) are missing: {}. "
+        "Please add them to requirements.txt and redeploy.".format(
+            ", ".join(missing_packages)
+        )
+    )
+    raise ModuleNotFoundError(
+        "Missing required package(s): {}".format(
+            ", ".join(missing_packages)
+        )
+    )
 
 # =========================
 # LOAD MODEL
@@ -12,8 +29,8 @@ import imblearn
 try:
     with open("best_xgboost_model.pkl", "rb") as f:
         model = pickle.load(f)
-except ModuleNotFoundError as e:
-    st.error("Model loading failed due to missing Python package: {}.\nAdd it to requirements.txt and redeploy.".format(e.name))
+except FileNotFoundError:
+    st.error("Model file best_xgboost_model.pkl not found. Make sure it is in the app root.")
     raise
 except Exception as e:
     st.error("Unexpected error loading model: {}".format(e))
