@@ -6,7 +6,7 @@ import pickle
 # Dependency check
 # =========================
 missing_packages = []
-for pkg in ("xgboost", "imblearn"):
+for pkg in ("xgboost", "imblearn", "sklearn"):
     try:
         __import__(pkg)
     except ModuleNotFoundError:
@@ -25,6 +25,24 @@ if missing_packages:
             ", ".join(missing_packages)
         )
     )
+
+import sklearn
+try:
+    from sklearn.utils import _param_validation
+except ImportError as e:
+    st.error(
+        "Your scikit-learn version ({}) is incompatible with imbalanced-learn. "
+        "Use scikit-learn >= 1.4.0 and redeploy.".format(sklearn.__version__)
+    )
+    raise
+
+if tuple(map(int, sklearn.__version__.split('.')[:2])) < (1, 4):
+    st.error(
+        "Unsupported scikit-learn version {}; required >=1.4.0".format(sklearn.__version__)
+    )
+    raise RuntimeError("scikit-learn too old")
+
+st.write(f"Loaded versions: scikit-learn={sklearn.__version__}, imbalanced-learn={__import__('imblearn').__version__}")
 
 # =========================
 # LOAD MODEL
